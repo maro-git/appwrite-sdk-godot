@@ -26,7 +26,7 @@ func __match_resource(type: int, params: Dictionary = {}) -> String:
 	match type:
 		DatabaseTask.Task.CREATE_COLLECTION, DatabaseTask.Task.LIST_COLLECTIONS: resource = _REST_BASE + (params.query if params.has("query") else "")
 		DatabaseTask.Task.GET_COLLECTION, DatabaseTask.Task.UPDATE_COLLECTION, DatabaseTask.Task.DELETE_COLLECTION: resource = _REST_BASE+"/"+params.collection_id
-		DatabaseTask.Task.CREATE_DOCUMENT, DatabaseTask.Task.LIST_DOCUMENTS : resource = _REST_BASE+"/"+params.collection_id+"/documents"
+		DatabaseTask.Task.CREATE_DOCUMENT, DatabaseTask.Task.LIST_DOCUMENTS : resource = "/databases/"+params.database_id+"/collections/"+params.collection_id+"/documents"
 		DatabaseTask.Task.GET_DOCUMENT, DatabaseTask.Task.UPDATE_DOCUMENT, DatabaseTask.Task.DELETE_DOCUMENT: resource = _REST_BASE+"/"+params.collection_id+"/documents/"+params.document_id + ("?"+params.query if params.has("query") else "")
 	return resource
 
@@ -55,16 +55,20 @@ func __post(type: int, payload: Dictionary = {}, params: Dictionary = {}) -> Dat
 
 # -------- CLIENT API
 func create_document(
-	collection_id: String, data: Dictionary,
+	database_id: String,
+	collection_id: String,
+	document_id: String,
+	data: Dictionary,
 	read: PoolStringArray = ["*"], write: PoolStringArray = ["*"],
 	parent_id: String = "", parent_property: String = "", parent_property_type: String = ""
 ) -> DatabaseTask:
 	var payload : Dictionary = {
+		"documentId" : document_id,
 		"data" : data,
 		"read" : read, "write" : write,
 		"parent_id" : parent_id, "parent_property" : parent_property, "parent_property_type" : parent_property_type
 		}
-	return __post(DatabaseTask.Task.CREATE_DOCUMENT, payload, { collection_id = collection_id })
+	return __post(DatabaseTask.Task.CREATE_DOCUMENT, payload, { database_id = database_id , collection_id = collection_id })
 
 func list_documents(collection_id: String, filters: String = "", order_field: String = "", order_type: String = "", order_cast: String = "", search: String = "") -> DatabaseTask:
 	var query: String = "?"
