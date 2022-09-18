@@ -27,7 +27,7 @@ func __match_resource(type: int, params: Dictionary = {}) -> String:
 		DatabaseTask.Task.CREATE_COLLECTION, DatabaseTask.Task.LIST_COLLECTIONS: resource = _REST_BASE + (params.query if params.has("query") else "")
 		DatabaseTask.Task.GET_COLLECTION, DatabaseTask.Task.UPDATE_COLLECTION, DatabaseTask.Task.DELETE_COLLECTION: resource = _REST_BASE+"/"+params.collection_id
 		DatabaseTask.Task.CREATE_DOCUMENT, DatabaseTask.Task.LIST_DOCUMENTS : resource = "/databases/"+params.database_id+"/collections/"+params.collection_id+"/documents"
-		DatabaseTask.Task.GET_DOCUMENT, DatabaseTask.Task.UPDATE_DOCUMENT, DatabaseTask.Task.DELETE_DOCUMENT: resource = _REST_BASE+"/"+params.collection_id+"/documents/"+params.document_id + ("?"+params.query if params.has("query") else "")
+		DatabaseTask.Task.GET_DOCUMENT, DatabaseTask.Task.UPDATE_DOCUMENT, DatabaseTask.Task.DELETE_DOCUMENT: resource = "/databases/"+params.database_id+"/collections/"+params.collection_id+"/documents/"+params.document_id + ("?"+params.query if params.has("query") else "")
 	return resource
 
 # GET, DELETE base function
@@ -79,21 +79,21 @@ func list_documents(collection_id: String, filters: String = "", order_field: St
 	if order_cast!="": query+="&orderCast="+order_cast
 	return __get(DatabaseTask.Task.LIST_DOCUMENTS, {collection_id = collection_id, query = query})
 
-func get_document(collection_id: String, document_id: String) -> DatabaseTask:
-	return __get(DatabaseTask.Task.GET_DOCUMENT, {collection_id = collection_id, document_id = document_id})
+func get_document(database_id: String, collection_id: String, document_id: String) -> DatabaseTask:
+	return __get(DatabaseTask.Task.GET_DOCUMENT, {database_id = database_id, collection_id = collection_id, document_id = document_id})
 
 func update_document(
-	document_id: String, collection_id: String, 
+	database_id: String, collection_id: String, document_id, 
 	data: Dictionary, read: PoolStringArray = ["*"], write: PoolStringArray = ["*"]
 ) -> DatabaseTask:
 	var payload : Dictionary = {
 		"data" : data,
 		"read" : read, "write" : write,
 		}
-	return __post(DatabaseTask.Task.UPDATE_DOCUMENT, payload, { collection_id = collection_id, document_id = document_id })
+	return __post(DatabaseTask.Task.UPDATE_DOCUMENT, payload, { database_id = database_id , collection_id = collection_id, document_id = document_id })
 
-func delete_document(collection_id: String, document_id: String) -> DatabaseTask:
-	return __post(DatabaseTask.Task.DELETE_DOCUMENT, {}, { collection_id = collection_id, document_id = document_id })
+func delete_document(database_id: String,collection_id: String, document_id: String) -> DatabaseTask:
+	return __post(DatabaseTask.Task.DELETE_DOCUMENT, {}, { database_id = database_id , collection_id = collection_id, document_id = document_id })
 
 # ------- SERVER API
 func create_collection(
